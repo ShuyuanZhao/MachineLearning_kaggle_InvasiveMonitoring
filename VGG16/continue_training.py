@@ -12,7 +12,6 @@ from keras import optimizers
 from keras.optimizers import SGD
 from keras.models import model_from_json
 from keras.callbacks import ModelCheckpoint
-from keras.regularizers import l2, activity_l2
 from keras.layers import Dropout
 
 # load data

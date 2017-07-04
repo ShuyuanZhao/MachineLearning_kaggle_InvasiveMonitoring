@@ -13,6 +13,7 @@ from keras.optimizers import SGD
 from keras.models import model_from_json
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dropout
+from keras.models import model_from_json
 
 def training_data_shuffle(x_train, y_train):
     random_index = np.random.permutation(len(y_train))

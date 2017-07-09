@@ -1,8 +1,4 @@
-
 # coding: utf-8
-
-# In[1]:
-
 import os
 import numpy as np
 import pandas as pd
@@ -15,9 +11,6 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint
 
 from densenet121 import densenet121_model
-
-
-# In[12]:
 
 def get_data(img_size, split_rate):
     # get train data
@@ -87,34 +80,22 @@ def get_data(img_size, split_rate):
     return x_train, y_train, x_test, y_test, test_img_nos, test  
 
 
-# In[8]:
-
-# seting
-img_size = 128
-split_rate = 0.1
-
-
-# In[14]:
-
-(x_train, y_train, x_test, y_test, test_img_nos, test) = get_data(img_size, split_rate)
-
-
-# In[15]:
-
+# get model
 model = densenet121_model(img_rows=128, img_cols=128, color_type=3, num_classes=1000)
 model.load_weights('./cp_weights.hdf5')
-
 model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='binary_crossentropy', metrics=['accuracy'])
 
 
-# In[16]:
+# get data
+img_size = 128
+split_rate = 0.1
+(x_train, y_train, x_test, y_test, test_img_nos, test) = get_data(img_size, split_rate)
 
 datagen = ImageDataGenerator(rotation_range=30,width_shift_range=0.2,height_shift_range=0.2,horizontal_flip=True)
 datagen.fit(x_train)
 
 
-# In[18]:
-
+# training process
 nb_epoch = 1
 batch_size = 32
 checkpointer = ModelCheckpoint(filepath= './cp_weights_with_2_epoch.hdf5', verbose=1, monitor='val_acc',save_best_only=True, save_weights_only=True)
@@ -123,9 +104,6 @@ model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
                     epochs=nb_epoch,
                     validation_data = (x_test, y_test),
                     callbacks=[checkpointer])
-
-
-# In[ ]:
 
 
 

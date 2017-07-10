@@ -15,25 +15,77 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Dropout
 from keras.models import model_from_json
 
-def training_data_shuffle(x_train, y_train):
-    random_index = np.random.permutation(len(y_train))
+def get_data(img_size, split_rate):
+    # get train data
+    train_label = pd.read_csv("../../data/train_labels.csv")
+    img_path = "../../data/train/"
+    
+    file_paths = []
+    y = []
+    for i in range(len(train_label)):
+        file_paths.append( img_path + str(train_label.iloc[i][0]) +'.jpg' )
+        y.append(train_label.iloc[i][1])
+    y = np.array(y)
+
+    x = []
+    for i, img_path in enumerate(file_paths):
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+        img = image.load_img(img_path, target_size=(img_size, img_size))
+        img = image.img_to_array(img)   
+        x.append(img)
+    x = np.array(x)
+    
+    # get test data
+    test_no = pd.read_csv("../../data/sample_submission.csv")
+    test_img_path = "../../data/test/"
+
+    test_file_paths = []
+    test_img_nos = []
+    for i in range(len(test_no)):
+        test_file_paths.append( test_img_path + str(int(test_no.iloc[i][0])) +'.jpg' )
+        test_img_nos.append(int(test_no.iloc[i][0]))
+    test_img_nos = np.array(test_img_nos)
+
+    test = []
+    for i, img_path in enumerate(test_file_paths):
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+        img = image.load_img(img_path, target_size=(img_size, img_size))
+        img = image.img_to_array(img)   
+        test.append(img)
+    test = np.array(test)
+
+    test = test.astype('float32')
+    test /= 255
+    
+    # data shuffle
+    random_index = np.random.permutation(len(y))
     x_shuffle = []
     y_shuffle = []
-    for i in range(len(y_train)):
-        x_shuffle.append(x_train[random_index[i]])
-        y_shuffle.append(y_train[random_index[i]])
-    x = np.array(x_shuffle)
+    for i in range(len(y)):
+        x_shuffle.append(x[random_index[i]])
+        y_shuffle.append(y[random_index[i]])
+
+    x = np.array(x_shuffle) 
     y = np.array(y_shuffle)
     
-    return x, y    
+    # data split
+    val_split_num = int(round(split_rate*len(y)))
+    x_train = x[val_split_num:]
+    y_train = y[val_split_num:]
+    x_test = x[:val_split_num]
+    y_test = y[:val_split_num]
 
-# load data
-x_train = np.load('./x_train.npy')
-y_train = np.load('./y_train.npy') 
-x_test = np.load('./x_test.npy')
-y_test = np.load('./y_test.npy')
-# data shuffle
-(x_train, y_train) = training_data_shuffle(x_train, y_train) 
+    x_train = x_train.astype('float32')
+    x_test = x_test.astype('float32')
+    x_train /= 255
+    x_test /= 255
+    
+    return x_train, y_train, x_test, y_test, test_img_nos, test  
+
+# get data
+img_size = 224
+split_rate = 0.1
+(x_train, y_train, x_test, y_test, test_img_nos, test) = get_data(img_size, split_rate)
 
 
 # load json and create model
@@ -60,7 +112,7 @@ datagen.fit(x_train)
 
 
 # trainning process
-nb_epoch = 5
+nb_epoch = 1
 batch_size = 32
 
 save_path = './cp_weights_2.hdf5'

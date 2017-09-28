@@ -27,7 +27,6 @@ for i, img_path in enumerate(file_paths):
     x.append(img)
 x = np.array(x)
 
-
 # get test data
 test_no = pd.read_csv("../../data/sample_submission.csv")
 test_img_path = "../../data/test/"
@@ -50,7 +49,6 @@ test = np.array(test)
 test = test.astype('float32')
 test /= 255
 
-
 # data shuffle
 random_index = np.random.permutation(len(y))
 x_shuffle = []
@@ -61,7 +59,6 @@ for i in range(len(y)):
     
 x = np.array(x_shuffle) 
 y = np.array(y_shuffle)
-
 
 # data split
 val_split_num = int(round(0.2*len(y)))
@@ -80,7 +77,6 @@ print('y_train shape:', y_train.shape)
 print('x_test shape:', x_test.shape)
 print('y_test shape:', y_test.shape)
 print('test shape:', test.shape)
-
 
 # save data
 np.save('./x_train.npy',x_train)
